@@ -1,41 +1,55 @@
+#!/usr/bin/python3
+
 from gpiozero import Button
 from gpiozero import LineSensor
-from gpiozero import Motor
+from gpiozero import OutputDevice
 from gpiozero import LED
 
+import time
+
 #Pin Definitions
-MOTORFWDPIN = 7     #GPIO4
-MOTORBAKPIN = 11    #GPIO17
-SUCCESSLEDPIN = 13  #GPIO21
-CANDYBUTTONPIN = 15 #GPIO22
-UPLINESENSPIN = 8   #GPIO14
-DNLINESENSPIN = 10  #GPIO15
+MOTORFWDPIN = 4     #Pin 7
+MOTORBAKPIN = 17    #Pin 11
+SUCCESSLEDPIN = 21  #Pin 13
+CANDYBUTTONPIN = 22 #Pin 15
+UPLINESENSPIN = 14  #Pin 8
+DNLINESENSPIN = 15  #Pin 10
 
 #Device Definitions
-candyRequester = Button(CANDYBUTTONPIN)
+#candyRequester = Button(CANDYBUTTONPIN)
 successLED = LED(SUCCESSLEDPIN)
-motor = Motor(MOTORFWDPIN, MOTORBAKPIN)
+motorfwd = OutputDevice(MOTORFWDPIN, active_high=False, initial_value=False)
+motorbkwd = OutputDevice(MOTORBAKPIN, active_high=False, initial_value=False)
 upSensor = LineSensor(UPLINESENSPIN)
-dnSensor = LineSensor(DNLINESENSPIN)
-
-def candysuccess():
+candyRequester = LineSensor(DNLINESENSPIN)
 
 def candydrop():
-	motor.forward()
-	upSensor.wait_for_no_line(3) #Spin until line is broken or 3 seconds elapses
-	motor.stop()
-	
-	
+    motorfwd.on()
+    print("motor spinning")
+    #retval=upSensor.wait_for_no_line()#3) #Spin until line is broken or 3 seconds elapses
+    #retval=upSensor.wait_for_line(3) #Spin until line is broken or 3 seconds elapses
+    #if retval:
+    #    print("Candy dropped")
+    #else:
+    #    print("No candy")
+    time.sleep(1)
+    motorfwd.off()
+    print("motor stopped")
+
 def main():
-	
-
-	
-	while True:
-		if candyRequester.is_pressed():
-			candydrop()
-
-
+    counter = 0
+    while True:
+        print("BEGIN")
+        #candyRequester.wait_for_no_line()
+        candyRequester.wait_for_line()
+        print("button pressed")
+        candydrop()
+        counter = counter + 1
+        print(counter)
+        #candyRequester.wait_for_line()
+        candyRequester.wait_for_no_line()
 
 
 if __name__ == "__main__":
-	main()
+  main()
+
